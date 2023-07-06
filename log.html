@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>日志</title>
+  <link rel="stylesheet" href="layui/css/layui.css">
+</head>
+<body>
+  <div class="layui-layout layui-layout-admin" style="overflow: hidden;">
+    <div class="layui-header">
+      <ul class="layui-nav">
+        <li class="layui-nav-item"><a href="/" target="_blank">统计</a></li>
+        <li class="layui-nav-item"><a href="/manage.html" target="_blank">配置</a></li>
+        <li class="layui-nav-item"><a href="">日志</a></li>
+      </ul>
+    </div>
+    <div class="layui-body" style="left: 0;">
+      <div class="layui-container">
+        <div class="layui-row" style="padding: 20px;">
+          <textarea id="log" name="log" style="height: calc(100vh - 100px); resize: none;" readonly class="layui-textarea"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="layui/layui.js"></script>
+  <script src="js/sockjs.min.js"></script>
+  <script src="js/stomp.min.js"></script>
+  <script type="text/javascript">
+    // JQuery
+    var $ = layui.$
+    // 后端服务地址
+    const hostport = "http://localhost:8080"
+
+    const log = $('#log')
+
+    let stompClient = null
+
+    let connect = () => {
+      let socket = new SockJS(hostport + '/stomp')
+      stompClient = Stomp.over(socket)
+      stompClient.connect({}, frame => {
+        stompClient.subscribe('/topic/log', msg => {
+          log.prop('textContent', log.prop('textContent') + msg.body)
+          log.scrollTop(log.prop("scrollHeight"))
+        })
+      })
+    }
+
+    let disconnect = () => {
+      if (stompClient !== null) {
+        stompClient.disconnect()
+      }
+      console.log("Disconnected")
+    }
+
+    window.onload = connect
+    window.onbeforeunload = disconnect
+  </script>
+</body>

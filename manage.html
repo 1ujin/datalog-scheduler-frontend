@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <style>
+      .layui-table {
+        margin: 0;
+      }
+
+      /*使下拉列表框不被遮挡*/
+      div[lay-id="connectionTable"] .layui-table-body {
+        overflow: visible;
+      }
+      div[lay-id="connectionTable"] .layui-table-box {
+        overflow: visible;
+      }
+      div[lay-id="connectionTable"] td[data-field="system"] .layui-table-cell {
+        overflow: visible !important;
+      }
+      /*使列表框与表格单元格重合*/
+      div[lay-id="connectionTable"] td[data-field="system"] .layui-form-select {
+        margin-top: -10px;
+        margin-left: -15px;
+        margin-right: -15px;
+      }
+      div[lay-id="connectionTable"] td[data-field="system"] input {
+        border: none;
+      }
+      div[lay-id="connectionTable"] td[data-field="sync"] .layui-table-grid-down {
+        display: none;
+      }
+      div[lay-id="connectionTable"] td[data-field="sync"] .layui-table-cell {
+        text-overflow: clip;
+      }
+
+      /*使下拉列表框不被遮挡*/
+      div[lay-id="backupInfoTable"] .layui-table-body {
+        overflow: visible;
+      }
+      div[lay-id="backupInfoTable"] .layui-table-box {
+        overflow: visible;
+      }
+      div[lay-id="backupInfoTable"] td[data-field="system"] .layui-table-cell {
+        overflow: visible !important;
+      }
+      div[lay-id="backupInfoTable"] td[data-field="compressionLevel"] .layui-table-cell {
+        overflow: visible !important;
+      }
+      /*使列表框与表格单元格重合*/
+      div[lay-id="backupInfoTable"] td[data-field="system"] .layui-form-select {
+        margin-top: -10px;
+        margin-left: -15px;
+        margin-right: -15px;
+      }
+      div[lay-id="backupInfoTable"] td[data-field="compressionLevel"] .layui-form-select {
+        margin-top: -10px;
+        margin-left: -15px;
+        margin-right: -15px;
+      }
+      div[lay-id="backupInfoTable"] td[data-field="system"] input {
+        border: none;
+      }
+      div[lay-id="backupInfoTable"] td[data-field="compressionLevel"] input {
+        border: none;
+      }
+    </style>
+</head>
+<body>
+  <div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+      <ul class="layui-nav">
+        <li class="layui-nav-item"><a href="/">统计</a></li>
+        <li class="layui-nav-item"><a href="">配置</a></li>
+        <li class="layui-nav-item"><a href="/log.html" target="_blank">日志</a></li>
+      </ul>
+    </div>
+    <div class="layui-body" style="left: 0;">
+      <div class="layui-container" style="">
+        <fieldset class="layui-elem-field layui-field-title" style="margin: 20px 0 0 0;">
+          <legend>测试机台</legend>
+        </fieldset>
+        <div class="layui-row">
+          <script type="text/html" id="connectionToolbar">
+            <div class="layui-inline" lay-event="add">
+              <i class="layui-icon layui-icon-add-1"></i>
+            </div>
+            <div class="layui-inline" lay-event="update">
+              <i class="layui-icon layui-icon-ok"></i>
+            </div>
+            <div class="layui-inline" lay-event="delete">
+              <i class="layui-icon layui-icon-delete"></i>
+            </div>
+          </script>
+          <script type="text/html" id="syncCheck">
+            <input type="checkbox" name="sync" title="同步" lay-filter="switcher" {{ d.sync == true ? 'checked' : '' }}>
+          </script>
+          <script type="text/html" id="password">
+            <input type="password" name="password" value="{{ d.password }}" style="border: none; width: 100%;" oninput="passwordInputEventHandler(event)">
+          </script>
+          <table class="layui-table" id="connectionTable" lay-filter="connection"></table>
+        </div>
+
+        <fieldset class="layui-elem-field layui-field-title" style="margin: 0;">
+          <legend>备份机</legend>
+        </fieldset>
+        <div class="layui-row">
+          <script type="text/html" id="backupInfoToolbar">
+            <div class="layui-inline" lay-event="add">
+              <i class="layui-icon layui-icon-add-1"></i>
+            </div>
+            <div class="layui-inline" lay-event="update">
+              <i class="layui-icon layui-icon-ok"></i>
+            </div>
+            <div class="layui-inline" lay-event="delete">
+              <i class="layui-icon layui-icon-delete"></i>
+            </div>
+          </script>
+          <script type="text/html" id="backupCheck">
+            <input type="checkbox" name="backup" title="备份" lay-filter="switcher" {{ d.sync == true ? 'checked' : '' }}>
+          </script>
+          <script type="text/html" id="password">
+            <input type="password" name="password" value="{{ d.password }}" style="border: none; width: 100%;" oninput="passwordInputEventHandler(event)">
+          </script>
+          <table class="layui-table" id="backupInfoTable" lay-filter="backupInfo"></table>
+        </div>
+        
+        <fieldset class="layui-elem-field layui-field-title" style="margin: 0;">
+          <legend>测试人员</legend>
+        </fieldset>
+        <div class="layui-row" style="padding-bottom: 20px;">
+          <script type="text/html" id="testerToolbar">
+            <div class="layui-inline" lay-event="add">
+              <i class="layui-icon layui-icon-add-1"></i>
+            </div>
+            <div class="layui-inline" lay-event="update">
+              <i class="layui-icon layui-icon-ok"></i>
+            </div>
+            <div class="layui-inline" lay-event="delete">
+              <i class="layui-icon layui-icon-delete"></i>
+            </div>
+          </script>
+          <table class="layui-table" id="testerTable" lay-filter="tester"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="layui/layui.js"></script>
+  <script type="text/javascript">
+    // JQuery
+    var $ = layui.$
+    // 后端服务地址
+    const hostport = "http://localhost:8080"
+    // 被修改过的测试机台编号集合
+    const modifiedConnections = new Set()
+    // 被修改过的备份机编号集合
+    const modifiedBackupInfos = new Set()
+    // 被修改过的测试人员编号集合
+    const modifiedTesters = new Set()
+
+    layui.use(() => {
+      var layer = layui.layer,
+        form = layui.form,
+        element = layui.element,
+        table = layui.table
+
+      // 测试机台表格配置
+      var connectionOpt = {
+        elem: '#connectionTable',
+        url: hostport + "/connection",
+        toolbar: '#connectionToolbar',
+        defaultToolbar: [],
+        escape: true,
+        even: true,
+        limit: 100,
+        loading: true,
+        cols: [[
+          { type: 'checkbox', fixed: 'left', align: 'center' },
+          { field: 'id', title: 'ID', sort: true, hide: true },
+          { field: 'host', title: 'IP地址', sort: true, edit: 'text' },
+          { field: 'port', title: '端口', edit: 'text' },
+          { field: 'username', title: '用户名', edit: 'text' },
+          { field: 'password', title: '密码', templet: '#password' },
+          { field: 'prefixRemotePath', title: '目标路径', edit: 'text' },
+          { field: 'prefixLocalPath', title: '本地路径', edit: 'text' },
+          { field: 'prefixVolumePath', title: '挂载路径', edit: 'text' },
+          { field: 'system', title: '测试系统类型', templet: d => {
+            return "\
+              <select name='system' lay-verify='required' value='" + d.system + "' lay-filter='systemSelect'>\
+                <option value=''></option>\
+                <option value='ADV93000'" + (d.system === 'ADV93000' ? 'selected' : '') + ">ADV93000</option>\
+                <option value='J750'" + (d.system === 'J750' ? 'selected' : '') + ">J750</option>\
+                <option value='ULTRA_FLEX'" + (d.system === 'ULTRA_FLEX' ? 'selected' : '') + ">Ultra Flex</option>\
+              </select>\
+            "
+          }, unresize: true },
+          { field: 'computerName', title: '机台名', sort: true, edit: 'text' },
+          { field: 'sync', title: '加入同步', templet: '#syncCheck', unresize: true }
+        ]],
+        parseData: res => {
+          res.data.forEach(item => {
+            if (typeof item.prefixVolumePath === 'undefined' || item.prefixVolumePath === null || item.prefixVolumePath === '') {
+              if (typeof item.prefixLocalPath !== 'undefined') {
+                item.prefixVolumePath = item.prefixLocalPath
+              }
+            }
+          })
+          return res
+        }
+      }
+
+      // 测试机台表格实例
+      var connectionTableIns = table.render(connectionOpt)
+
+      // 备份机表格配置
+      var backupInfoOpt = {
+        elem: '#backupInfoTable',
+        url: hostport + "/backup-info",
+        toolbar: '#backupInfoToolbar',
+        defaultToolbar: [],
+        escape: true,
+        even: true,
+        limit: 100,
+        loading: true,
+        cols: [[
+          { type: 'checkbox', fixed: 'left', align: 'center' },
+          { field: 'id', title: 'ID', sort: true, hide: true },
+          { field: 'host', title: 'IP地址', sort: true, edit: 'text' },
+          { field: 'port', title: '端口', edit: 'text' },
+          { field: 'username', title: '用户名', edit: 'text' },
+          { field: 'password', title: '密码', templet: '#password' },
+          { field: 'prefixBackupPath', title: '目标路径', edit: 'text' },
+          { field: 'system', title: '备份系统类型', templet: d => {
+            return "\
+              <select name='system' lay-verify='required' value='" + d.system + "' lay-filter='systemSelect'>\
+                <option value=''></option>\
+                <option value='WINDOWS'" + (d.system === 'WINDOWS' ? 'selected' : '') + ">Windows</option>\
+                <option value='LINUX'" + (d.system === 'LINUX' ? 'selected' : '') + ">Linux</option>\
+              </select>\
+            "
+          }, unresize: true },
+          { field: 'compressionLevel', title: '压缩级别', hide: true, templet: d => {
+            return "\
+              <select name='compressionLevel' lay-verify='required' value='" + d.compressionLevel + "' lay-filter='systemSelect'>\
+                <option value='6'" + (d.compressionLevel == '6' || d.compressionLevel == '-1' ? 'selected' : '') + ">6（默认）</option>\
+                <option value='0'" + (d.compressionLevel == '0' ? 'selected' : '') + ">0（不压缩）</option>\
+                <option value='1'" + (d.compressionLevel == '1' ? 'selected' : '') + ">1</option>\
+                <option value='2'" + (d.compressionLevel == '2' ? 'selected' : '') + ">2</option>\
+                <option value='3'" + (d.compressionLevel == '3' ? 'selected' : '') + ">3</option>\
+                <option value='4'" + (d.compressionLevel == '4' ? 'selected' : '') + ">4</option>\
+                <option value='5'" + (d.compressionLevel == '5' ? 'selected' : '') + ">5</option>\
+                <option value='6'" + (d.compressionLevel == '6' || d.compressionLevel == '-1' ? 'selected' : '') + ">6（默认）</option>\
+                <option value='7'" + (d.compressionLevel == '7' ? 'selected' : '') + ">7</option>\
+                <option value='8'" + (d.compressionLevel == '8' ? 'selected' : '') + ">8</option>\
+                <option value='9'" + (d.compressionLevel == '9' ? 'selected' : '') + ">9（体积最小）</option>\
+              </select>\
+            "
+          }, unresize: true },
+          { field: 'sync', title: '加入备份', templet: '#backupCheck', unresize: false }
+        ]]
+      }
+
+      // 测试机台表格实例
+      var backupInfoTableIns = table.render(backupInfoOpt)
+
+      // 测试人员表格配置
+      const testerOpt = {
+        elem: '#testerTable',
+        url: hostport + "/tester",
+        toolbar: '#testerToolbar',
+        defaultToolbar: [],
+        escape: true,
+        even: true,
+        limit: 100,
+        loading: true,
+        cols: [[
+          { type: 'checkbox', fixed: 'left', align: 'center' },
+          { field: 'id', title: 'ID', sort: true, hide: true },
+          { field: 'name', title: '姓名', edit: 'text' },
+          { field: 'pinyin', title: '拼音', edit: 'text' },
+          { field: 'abbreviation', title: '简写', edit: 'text'}
+        ]]
+      }
+
+      // 测试人员表格实例
+      var testerTableIns = table.render(testerOpt)
+
+      //监听测试机台表格单元格编辑
+      table.on('edit(connection)', obj => {
+        modifiedConnections.add(obj.data.id)
+      })
+
+      //监听测试机台表格单元格编辑
+      table.on('edit(backupInfo)', obj => {
+        modifiedBackupInfos.add(obj.data.id)
+      })
+
+      //监听测试人员表格单元格编辑
+      table.on('edit(tester)', obj => {
+        modifiedTesters.add(obj.data.id)
+      })
+
+      // 监听select事件修改表格缓存
+      form.on('select(systemSelect)', data => {
+        selectedElem = $(data.elem)
+        tableView = selectedElem.closest('.layui-table-view')
+        col = selectedElem.closest('td').data('field')
+        row = selectedElem.closest('tr').data('index')
+        id = table.cache[tableView.attr('lay-id')][row].id
+        if (tableView.attr('lay-id') === 'connectionTable') {
+          modifiedConnections.add(id)
+        } else if (tableView.attr('lay-id') === 'backupInfoTable') {
+          modifiedBackupInfos.add(id)
+        }
+        table.cache[tableView.attr('lay-id')][row][col] = data.value
+      })
+
+      // 监听switch事件修改表格缓存
+      form.on('checkbox(switcher)', data => {
+        checkedElem = $(data.elem)
+        tableView = checkedElem.closest('.layui-table-view')
+        col = checkedElem.closest('td').data('field')
+        row = checkedElem.closest('tr').data('index')
+        id = table.cache[tableView.attr('lay-id')][row].id
+        if (tableView.attr('lay-id') === 'connectionTable') {
+          modifiedConnections.add(id)
+        } else if (tableView.attr('lay-id') === 'backupInfoTable') {
+          modifiedBackupInfos.add(id)
+        }
+        table.cache[tableView.attr('lay-id')][row][col] = data.elem.checked
+      })
+
+      // 绑定测试机台表格的toolbar事件
+      table.on('toolbar(connection)', function(obj) {
+        var checkStatus = table.checkStatus(obj.config.id)
+        data = checkStatus.data; //获取选中的数据
+        switch(obj.event) {
+          case 'add':
+            tableData = table.cache['connectionTable']
+            table.cache['connectionTable'].unshift({})
+            table.reload('connectionTable', {
+              url: null,
+              data: tableData
+            })
+            break
+          case 'update':
+            currentData = table.cache['connectionTable']
+            updateData = []
+            insertData = []
+            currentData.forEach(connection => {
+              if (connection.id == null || connection.id === '') {
+                insertData.push(connection)
+              } else if (modifiedConnections.has(connection.id)) {
+                updateData.push(connection)
+              }
+            })
+            updateData.forEach(connection => {
+              if (typeof connection.prefixVolumePath === 'undefined' || connection.prefixVolumePath === null || connection.prefixVolumePath === '') {
+                if (typeof connection.prefixLocalPath !== 'undefined') {
+                  connection.prefixVolumePath = connection.prefixLocalPath
+                }
+              }
+            })
+            insertData.forEach(connection => {
+              if (typeof connection.prefixVolumePath === 'undefined' || connection.prefixVolumePath === null || connection.prefixVolumePath === '') {
+                if (typeof connection.prefixLocalPath !== 'undefined') {
+                  connection.prefixVolumePath = connection.prefixLocalPath
+                }
+              }
+            })
+            if (updateData.length > 0) {
+              $.ajax({
+                "url": hostport + "/connection",
+                "method": "PUT",
+                "async": true,
+                "data": JSON.stringify(updateData),
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "success": res => {
+                  modifiedConnections.clear()
+                  table.reload('connectionTable', {
+                    url: hostport + "/connection"
+                  })
+                },
+                "error": (xhr, status, error) => {
+                  layer.msg(xhr.responseJSON.msg, {icon: 2})
+                }
+              })
+            }
+            if (insertData.length > 0) {
+              $.ajax({
+                "url": hostport + "/connection",
+                "method": "POST",
+                "async": true,
+                "data": JSON.stringify(insertData),
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "success": res => {
+                  layer.msg(res.msg, {icon: 1})
+                  table.reload('connectionTable', {
+                    url: hostport + "/connection"
+                  })
+                },
+                "error": (xhr, status, error) => {
+                  layer.msg(xhr.responseJSON.msg, {icon: 2})
+                }
+              })
+            }
+            break
+          case 'delete':
+            if (data.length === 0) {
+              layer.msg('请至少选择一行')
+            } else {
+              layer.confirm('确认删除？', {
+                btn: ['删除', '取消'] //按钮
+              }, () => {
+                unchecked = table.cache['connectionTable']
+                for (var i = unchecked.length - 1; i >= 0; i--) {
+                  if (unchecked[i].LAY_CHECKED === true) {
+                    unchecked.splice(i, 1)
+                  }
+                }
+                for (var i = data.length - 1; i >= 0; i--) {
+                  if (typeof data[i].id === 'undefined' || data[i].id === null || data[i].id === '') {
+                    data.splice(i, 1)
+                  }
+                }
+                if (data.length !== 0) {
+                  $.ajax({
+                    "url": hostport + "/connection",
+                    "method": "DELETE",
+                    "async": true,
+                    "data": JSON.stringify(data),
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "success": res => {
+                      table.reload('connectionTable', {
+                        url: null,
+                        data: unchecked
+                      })
+                      layer.msg(res.msg, {icon: 1})
+                    },
+                    "error": (xhr, status, error) => {
+                      layer.msg(xhr.responseJSON.msg, {icon: 2})
+                    }
+                  })
+                } else {
+                  table.reload('connectionTable', {
+                    url: null,
+                    data: unchecked
+                  })
+                }
+                layer.closeAll()
+              }, () => {
+                layer.closeAll()
+              })
+            }
+            break
+        }
+      })
+
+      // 绑定备份机表格的toolbar事件
+      table.on('toolbar(backupInfo)', function(obj) {
+        var checkStatus = table.checkStatus(obj.config.id)
+        data = checkStatus.data; //获取选中的数据
+        switch(obj.event) {
+          case 'add':
+            tableData = table.cache['backupInfoTable']
+            table.cache['backupInfoTable'].unshift({})
+            table.reload('backupInfoTable', {
+              url: null,
+              data: tableData
+            })
+            break
+          case 'update':
+            currentData = table.cache['backupInfoTable']
+            updateData = []
+            insertData = []
+            currentData.forEach(connection => {
+              if (connection.id == null || connection.id === '') {
+                insertData.push(connection)
+              } else if (modifiedBackupInfos.has(connection.id)) {
+                updateData.push(connection)
+              }
+            })
+            if (updateData.length > 0) {
+              $.ajax({
+                "url": hostport + "/backup-info",
+                "method": "PUT",
+                "async": true,
+                "data": JSON.stringify(updateData),
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "success": res => {
+                  modifiedBackupInfos.clear()
+                  table.reload('backupInfoTable', {
+                    url: hostport + "/backup-info"
+                  })
+                },
+                "error": (xhr, status, error) => {
+                  layer.msg(xhr.responseJSON.msg, {icon: 2})
+                }
+              })
+            }
+            if (insertData.length > 0) {
+              $.ajax({
+                "url": hostport + "/backup-info",
+                "method": "POST",
+                "async": true,
+                "data": JSON.stringify(insertData),
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "success": res => {
+                  layer.msg(res.msg, {icon: 1})
+                  table.reload('backupInfoTable', {
+                    url: hostport + "/backup-info"
+                  })
+                },
+                "error": (xhr, status, error) => {
+                  layer.msg(xhr.responseJSON.msg, {icon: 2})
+                }
+              })
+            }
+            break
+          case 'delete':
+            if (data.length === 0) {
+              layer.msg('请至少选择一行')
+            } else {
+              layer.confirm('确认删除？', {
+                btn: ['删除', '取消'] //按钮
+              }, () => {
+                unchecked = table.cache['backupInfoTable']
+                for (var i = unchecked.length - 1; i >= 0; i--) {
+                  if (unchecked[i].LAY_CHECKED === true) {
+                    unchecked.splice(i, 1)
+                  }
+                }
+                for (var i = data.length - 1; i >= 0; i--) {
+                  if (typeof data[i].id === 'undefined' || data[i].id === null || data[i].id === '') {
+                    data.splice(i, 1)
+                  }
+                }
+                if (data.length !== 0) {
+                  $.ajax({
+                    "url": hostport + "/backup-info",
+                    "method": "DELETE",
+                    "async": true,
+                    "data": JSON.stringify(data),
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "success": res => {
+                      table.reload('backupInfoTable', {
+                        url: null,
+                        data: unchecked
+                      })
+                      layer.msg(res.msg, {icon: 1})
+                    },
+                    "error": (xhr, status, error) => {
+                      layer.msg(xhr.responseJSON.msg, {icon: 2})
+                    }
+                  })
+                } else {
+                  table.reload('backupInfoTable', {
+                    url: null,
+                    data: unchecked
+                  })
+                }
+                layer.closeAll()
+              }, () => {
+                layer.closeAll()
+              })
+            }
+            break
+        }
+      })
+
+      // 绑定测试人员表格的toolbar事件
+      table.on('toolbar(tester)', function(obj) {
+        var checkStatus = table.checkStatus(obj.config.id)
+        data = checkStatus.data; //获取选中的数据
+        console.log(data)
+        switch(obj.event) {
+          case 'add':
+            tableData = table.cache['testerTable']
+            table.cache['testerTable'].unshift({})
+            table.reload('testerTable', {
+              url: null,
+              data: tableData
+            })
+            break
+          case 'update':
+            currentData = table.cache['testerTable']
+            updateData = []
+            insertData = []
+            currentData.forEach(tester => {
+              if (tester.id == null || tester.id === '') {
+                insertData.push(tester)
+              } else if (modifiedTesters.has(tester.id)) {
+                updateData.push(tester)
+              }
+            })
+            if (updateData.length > 0) {
+              $.ajax({
+                "url": hostport + "/tester",
+                "method": "PUT",
+                "async": true,
+                "data": JSON.stringify(updateData),
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "success": res => {
+                  modifiedTesters.clear()
+                  layer.msg(res.msg, {icon: 1})
+                  table.reload('testerTable', {
+                    url: hostport + "/tester"
+                  })
+                },
+                "error": (xhr, status, error) => {
+                  layer.msg(xhr.responseJSON.msg, {icon: 2})
+                }
+              })
+            }
+            if (insertData.length > 0) {
+              $.ajax({
+                "url": hostport + "/tester",
+                "method": "POST",
+                "async": true,
+                "data": JSON.stringify(insertData),
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "success": res => {
+                  layer.msg(res.msg, {icon: 1})
+                  table.reload('testerTable', {
+                    url: hostport + "/tester"
+                  })
+                },
+                "error": (xhr, status, error) => {
+                  layer.msg(xhr.responseJSON.msg, {icon: 2})
+                }
+              })
+            }
+            break
+          case 'delete':
+            if (data.length === 0) {
+              layer.msg('请至少选择一行')
+            } else {
+              layer.confirm('确认删除？', {
+                btn: ['删除', '取消'] //按钮
+              }, () => {
+                unchecked = table.cache['testerTable']
+                for (var i = unchecked.length - 1; i >= 0; i--) {
+                  if (unchecked[i].LAY_CHECKED === true) {
+                    unchecked.splice(i, 1)
+                  }
+                }
+                for (var i = data.length - 1; i >= 0; i--) {
+                  if (typeof data[i].id === 'undefined' || data[i].id === null || data[i].id === '') {
+                    data.splice(i, 1)
+                  }
+                }
+                if (data.length !== 0) {
+                  $.ajax({
+                    "url": hostport + "/tester",
+                    "method": "DELETE",
+                    "async": true,
+                    "data": JSON.stringify(data),
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "success": res => {
+                      table.reload('testerTable', {
+                        url: null,
+                        data: unchecked
+                      })
+                      layer.msg(res.msg, {icon: 1})
+                    },
+                    "error": (xhr, status, error) => {
+                      layer.msg(xhr.responseJSON.msg, {icon: 2})
+                    }
+                  })
+                } else {
+                  table.reload('testerTable', {
+                    url: null,
+                    data: unchecked
+                  })
+                }
+                layer.closeAll()
+              }, () => {
+                layer.closeAll()
+              })
+            }
+            break
+        }
+      })
+    })
+    
+    // 处理输入框事件
+    var passwordInputEventHandler = e => {
+      input = $(e.target)
+      tableView = input.closest('.layui-table-view')
+      col = input.closest('td').data('field')
+      row = input.closest('tr').data('index')
+      id = layui.table.cache[tableView.attr('lay-id')][row].id
+      if (tableView.attr('lay-id') === 'connectionTable') {
+        modifiedConnections.add(id)
+      } else if (tableView.attr('lay-id') === 'backupInfoTable') {
+        modifiedBackupInfos.add(id)
+      }
+      layui.table.cache[tableView.attr('lay-id')][row][col] = e.target.value
+    }
+  </script>
+</body>
+</html>

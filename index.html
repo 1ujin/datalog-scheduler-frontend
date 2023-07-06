@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>统计</title>
+  <link rel="stylesheet" href="layui/css/layui.css">
+</head>
+
+<div id="syncTime" class="layui-inline" style="margin: 20px; display: none;">
+  <input type="text" class="layui-input" id="syncTimeInput">
+</div>
+<body>
+  <div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+      <ul class="layui-nav">
+        <li class="layui-nav-item"><a href="">统计</a></li>
+        <li class="layui-nav-item"><a href="/manage.html">配置</a></li>
+        <li class="layui-nav-item"><a href="/log.html" target="_blank">日志</a></li>
+      </ul>
+    </div>
+    <div class="layui-body" style="left: 0;">
+      <div class="layui-container">
+        <div class="layui-row" style="padding: 20px;">
+          <div class="layui-panel" style="padding: 10px;">
+            <div class="layui-form">
+              <div class="layui-form-item" style="margin: 0;">
+                <div class="layui-inline" style="margin: 0;">
+                  <div class="layui-inline" id="dateScope1">
+                    <label class="layui-form-label" style="width: fit-content;">日期范围</label>
+                    <div class="layui-input-inline">
+                      <input type="text" autocomplete="off" id="beginDate1" class="layui-input" placeholder="开始日期">
+                    </div>
+                    <div class="layui-form-mid">-</div>
+                    <div class="layui-input-inline">
+                      <input type="text" autocomplete="off" id="endDate1" class="layui-input" placeholder="结束日期">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: fit-content;">单位</label>
+                    <div class="layui-input-inline" style="width: 70px;">
+                      <select id="period" lay-verify="required">
+                        <option value="day">日</option>
+                        <option value="week">周</option>
+                        <option value="month">月</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="layui-inline" id="testerSelect1">
+                    <div class="layui-input-inline">
+                      <input type="text" readonly id="testerInput1" autocomplete="off" class="layui-input" placeholder="测试人员">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <div class="layui-input-inline" style="width: fit-content;">
+                      <button id="btn1" type="button" class="layui-btn">查询</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <fieldset class="layui-elem-field layui-field-title" style="margin-bottom: 30px;"></fieldset>
+            <div id="chart" style="height: 400px; width: auto;"></div>
+          </div>
+        </div>
+        <div class="layui-row" style="padding: 20px;">
+          <div class="layui-panel" style="padding: 10px;">
+            <div class="layui-form">
+              <div class="layui-form-item" style="margin: 0;">
+                <div class="layui-inline" style="margin: 0;">
+                  <div class="layui-inline" id="dateScope2">
+                    <label class="layui-form-label" style="width: fit-content;">日期范围</label>
+                    <div class="layui-input-inline">
+                      <input type="text" autocomplete="off" id="beginDate2" class="layui-input" placeholder="开始日期">
+                    </div>
+                    <div class="layui-form-mid">-</div>
+                    <div class="layui-input-inline">
+                      <input type="text" autocomplete="off" id="endDate2" class="layui-input" placeholder="结束日期">
+                    </div>
+                  </div>
+                  <div class="layui-inline" id="testerSelect2">
+                    <div class="layui-input-inline">
+                      <input type="text" id="testerInput2" autocomplete="off" class="layui-input" placeholder="测试人员">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <div class="layui-input-inline" style="width: fit-content;">
+                      <button id="btn2" type="button" class="layui-btn">查询</button>
+                    </div>
+                  </div>
+                  <div class="layui-inline" style="width: fit-content;">
+                    <label class="layui-form-label" style="width: fit-content;">启动</label>
+                    <div class="layui-input-inline" style="width: fit-content;">
+                      <input id="syncSwitch" name="syncSwitch" lay-filter="syncSwitch" type="checkbox" lay-skin="switch" lay-text="ON|OFF">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <div class="layui-input-inline" style="width: fit-content;">
+                      <button id="syncTimeBtn" type="button" class="layui-btn layui-btn-xs layui-btn-radius layui-btn-primary" style="height: 24px;"></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <table class="layui-table" id="table" lay-filter="test"></table>
+          </div>
+        </div>
+        <div class="layui-row" style="padding: 20px; padding-bottom: 0;">
+          <div class="layui-panel" style="padding: 10px 0px;">
+            <div class="layui-form">
+              <div class="layui-form-item" style="margin: 0;">
+                <div class="layui-inline" style="margin: 0;">
+                  <div class="layui-inline" id="dateScope3">
+                    <label class="layui-form-label" style="width: fit-content;">日期范围</label>
+                    <div class="layui-input-inline">
+                      <input type="text" autocomplete="off" id="beginDate3" class="layui-input" placeholder="开始日期">
+                    </div>
+                    <div class="layui-form-mid">-</div>
+                    <div class="layui-input-inline">
+                      <input type="text" autocomplete="off" id="endDate3" class="layui-input" placeholder="结束日期">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: fit-content;">型号</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <select id="modelSelect" lay-verify="required">
+                      </select>
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <div class="layui-input-inline" id="report">
+                      <input type="radio" name="report" value="false" title="无报告" checked>
+                      <input type="radio" name="report" value="true" title="有报告">
+                    </div>
+                  <div class="layui-inline">
+                    <div class="layui-input-inline" style="width: fit-content;">
+                      <button id="btn3" type="button" class="layui-btn">查询</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="layui-bg-gray">
+          <div style="overflow-x: auto; overflow-y: hidden;">
+            <div id="bars" class="layui-inline layui-col-space10"
+              style="width: max-content; height: max-content; padding: 20px; margin: 0;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="layui/layui.js"></script>
+  <script src="js/echarts.min.js"></script>
+  <script type="text/javascript">
+    // JQuery
+    var $ = layui.$
+    // 后端服务地址
+    const hostport = "http://localhost:8080"
+    // 同步开关
+    let isSync = false
+    // 所有人员列表
+    const testers = []
+    // 所有型号列表
+    const models = []
+    // 同步时间
+    let syncTime = null
+
+    // 获取同步状态的方法
+    var getSyncStatus = () => {
+      $.ajax({
+        "url": hostport + "/sync/status",
+        "method": "GET",
+        "async": false,
+        "success": res => {
+          if (res.data) {
+            isSync = true
+          } else {
+            isSync = false
+          }
+        }
+      })
+      return isSync
+    }
+
+    getSyncStatus()
+
+    if (isSync) {
+      $('#syncSwitch').attr('checked', 'checked')
+      $('#syncTimeBtn').attr('class', "layui-btn layui-btn-xs layui-btn-radius layui-btn-danger")
+    } else {
+      $('#syncSwitch').removeAttr('checked')
+      $('#syncTimeBtn').attr('class', "layui-btn layui-btn-xs layui-btn-radius layui-btn-primary")
+    }
+
+    // 异步获取同步时间
+    var getSyncTime = () => {
+      let time = syncTime     
+      $.ajax({
+        "url": hostport + "/sync/get",
+        "method": "GET",
+        "async": false,
+        success: res => {
+          if (res.data != null) {
+            time = res.data
+          }
+        }
+      })
+      return time
+    }
+
+    syncTime = getSyncTime()
+    $('#syncTimeBtn').prop('textContent', syncTime)
+    
+    // 同步获取人员
+    var refreshTesters = () => {      
+      $.ajax({
+        "url": hostport + "/tester",
+        "method": "GET",
+        "async": false,
+        "success": res => {
+          testers.length = 0
+          for (var i = 0; i < res.data.length; i++) {
+            testers.push({
+              "value": res.data[i].id,
+              "title": res.data[i].name
+            })
+          }
+        }
+      })
+    }
+
+    refreshTesters()
+
+    // 同步获取型号
+    var refreshModels = () => {    
+      $.ajax({
+        "url": hostport + "/result/models",
+        "method": "GET",
+        "async": false,
+        "success": res => {
+          models.length = 0
+          res.data.forEach(e => {
+            models.push(e)
+          })
+
+          let modelSelect = document.getElementById('modelSelect')
+
+          let opt = document.createElement('option')
+          opt.value = ''
+          opt.textContent = '全部'
+          modelSelect.appendChild(opt)
+
+          for (var i = 0; i < models.length; i++) {
+            let opt = document.createElement('option')
+            opt.value = models[i]
+            opt.textContent = models[i]
+            modelSelect.appendChild(opt)
+          }
+        }
+      })
+    }
+
+    refreshModels()
+
+    layui.use(() => {
+      var layer = layui.layer,
+        form = layui.form,
+        laydate = layui.laydate,
+        table = layui.table,
+        dropdown = layui.dropdown,
+        transfer = layui.transfer
+
+      // 监听指定开关
+      form.on('switch(syncSwitch)', data => {
+        let newSync = data.elem.checked
+        // 确认框
+        layer.confirm('确认' + (newSync ? '开启' : '关闭') + '定时同步迁移？', {
+          btn: [(newSync ? '开启' : '关闭'), '取消'] //按钮
+        }, () => {
+          // 发送同步开关请求
+          $.ajax({
+            "url": hostport + "/sync/" + (newSync ? "open" : "close"),
+            "method": "GET",
+            "async": false,
+            "success": res => {
+              // 确认同步状态
+              data.elem.checked = getSyncStatus()
+              // 渲染
+              form.render()
+              if (isSync) {
+                $('#syncTimeBtn').attr('class', "layui-btn layui-btn-xs layui-btn-radius layui-btn-danger")
+              } else {
+                $('#syncTimeBtn').attr('class', "layui-btn layui-btn-xs layui-btn-radius layui-btn-primary")
+              }
+              layer.msg((newSync ? '开启' : '关闭') + (newSync == isSync ? '成功' : '失败'), {icon: 1})
+            }
+          })
+        }, () => {
+          data.elem.checked = isSync
+          // 渲染
+          form.render()
+        })
+      })
+
+      // 日期范围选择
+      laydate.render({
+        elem: '#dateScope1',
+        range: ['#beginDate1', '#endDate1'],
+      })
+
+      laydate.render({
+        elem: '#dateScope2',
+        range: ['#beginDate2', '#endDate2']
+      })
+
+      laydate.render({
+        elem: '#dateScope3',
+        range: ['#beginDate3', '#endDate3']
+      })
+
+      laydate.render({
+        elem: '#syncTimeInput',
+        type: 'time'
+      })
+
+      $('#syncTimeBtn').click(() => {
+        layer.open({
+          type: 1,
+          title: '修改时间',
+          content: $('#syncTime'),
+          btn: ['修改', '取消'], //按钮
+          success: () => {
+            $('#syncTimeInput').val(syncTime)
+          },
+          yes: () => {
+            let expectSyncTime = $('#syncTimeInput').val()
+            // 发送同步开关请求
+            $.ajax({
+              "url": hostport + "/sync/set",
+              "method": "GET",
+              "async": false,
+              "data": {
+                "time": expectSyncTime
+              },
+              "success": res => {
+                // 确认同步状态
+                syncTime = getSyncTime()
+                layer.closeAll()
+                $('#syncTimeBtn').prop('textContent', syncTime)
+                // 提示
+                if (expectSyncTime === syncTime) {
+                  layer.msg('修改成功', {icon: 1})
+                } else {
+                  layer.msg('修改失败', {icon: 1})
+                }
+              }
+            })
+          }
+        })
+      })
+
+      // 人员下拉列表+穿梭框
+      dropdown.render({
+        elem: '#testerSelect1',
+        content: [
+          '<div id="transfer1" class="demo-transfer"></div>'
+        ].join(''),
+        style: 'padding: 15px; box-shadow: 10px 10px 30px rgb(0 0 0 / 12%);',
+        ready: () => {
+          layui.use('transfer', transfer => {
+            transfer.render({
+              id: 'transfer1',
+              elem: '#transfer1',
+              title: ['待选', '已选'],
+              data: testers,
+              value: (() => {
+                let arr = []
+                document.getElementById('testerInput1').value.split(',').forEach(title => {
+                  testers.forEach(e => {
+                    if (title == e.title) {
+                      arr.push(e.value)
+                    }
+                  })
+                })
+                return arr
+              })(),
+              onchange: (obj, index) => {
+                let arr = []
+                transfer.getData('transfer1').forEach(e => {
+                  arr.push(e.title)
+                })
+                document.getElementById('testerInput1').value = arr.join()
+              }
+            })
+          })
+        },
+      })
+
+      dropdown.render({
+        elem: '#testerSelect2',
+        content: [
+          '<div id="transfer2" class="demo-transfer"></div>'
+        ].join(''),
+        style: 'padding: 15px; box-shadow: 10px 10px 30px rgb(0 0 0 / 12%);',
+        ready: () => {
+          layui.use('transfer', transfer => {
+            transfer.render({
+              id: 'transfer2',
+              elem: '#transfer2',
+              title: ['待选', '已选'],
+              data: testers,
+              value: (() => {
+                let arr = []
+                document.getElementById('testerInput2').value.split(',').forEach(title => {
+                  testers.forEach(e => {
+                    if (title == e.title) {
+                      arr.push(e.value)
+                    }
+                  })
+                })
+                return arr
+              })(),
+              onchange: (obj, index) => {
+                let arr = []
+                transfer.getData('transfer2').forEach(e => {
+                  arr.push(e.title)
+                })
+                document.getElementById('testerInput2').value = arr.join()
+              }
+            })
+          })
+        },
+      })
+
+      // 表格配置和数据
+      tableOpt = {
+        elem: '#table',
+        url: hostport + "/result/all",
+        where: {
+          beginDate: document.getElementById('beginDate2').value.replaceAll('-', ''),
+          endDate: document.getElementById('endDate2').value.replaceAll('-', ''),
+          testerNames: document.getElementById('testerInput2').value
+        },
+        title: '记录',
+        page: true, //开启分页
+        toolbar: true, //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+        loading: true,
+        even: true,
+        cols: [[ //表头
+          { type: 'checkbox', fixed: 'left', hide: true, align: 'center' },
+          { field: 'id', title: 'ID', sort: true, fixed: 'left', minWidth: 100, hide: true, align: 'center' },
+          { field: 'model', title: '型号', minWidth: 100, align: 'center' },
+          { field: 'batch', title: '批次', sort: true, minWidth: 100, align: 'center' },
+          { field: 'agingPhase', title: '阶段', sort: true, minWidth: 100, align: 'center' },
+          { field: 'agingEndTime', title: '老炼时间', sort: true, minWidth: 100, align: 'center' },
+          { field: 'testBeginTime', title: '测试时间', sort: true, minWidth: 100, align: 'center' },
+          { field: 'temperature', title: '温度', sort: true, minWidth: 100, align: 'center' },
+          { field: 'jdGroup', title: '鉴定分组', minWidth: 100, align: 'center' },
+          { field: 'testerName', title: '测试人员', minWidth: 100, align: 'center' },
+          { field: 'chipId', title: '芯片编号', sort: true, minWidth: 100, align: 'center' },
+          { field: 'path', title: '本地路径', minWidth: 600, align: 'left' },
+          { field: 'duplicatePath', title: '文件名重复', minWidth: 600, align: 'left' },
+          { field: 'surfaceResult', title: '通过性', minWidth: 100, align: 'center' },
+          { field: 'realResult', title: '实际通过性', minWidth: 100, align: 'center' },
+          { field: 'system', title: '测试系统', minWidth: 100, align: 'center' },
+          { field: 'computerName', title: '机台', minWidth: 100, align: 'center' },
+          { field: 'resultType', title: '结果类型', minWidth: 100, align: 'center' },
+          { field: 'error', title: '内容正确性', minWidth: 100, align: 'center' },
+          { field: 'filesize', title: '文件大小', minWidth: 100, align: 'center' },
+          { field: 'testSuiteCount', title: '测试项数量', minWidth: 100, align: 'center' },
+          { field: 'createTime', title: '迁移时间', sort: true, minWidth: 200, align: 'center' },
+          // { fixed: 'right', align: 'center', toolbar: '#barDemo' }
+        ]],
+        parseData: res => { //res 即为原始返回的数据
+          for (let i = 0; i < res.data.length; i++) {
+            if (res.data[i].agingPhase == 'JD') {
+              res.data[i].agingPhase = '鉴定'
+            } else if (res.data[i].agingPhase == 'LAOLIANQIAN') {
+              res.data[i].agingPhase = '老炼前'
+            } else if (res.data[i].agingPhase == 'LAOLIANHOU') {
+              res.data[i].agingPhase = '老炼后'
+            }
+            res.data[i].error = res.data[i].error ? '错误' : '正确'
+          }
+          return res
+        }
+      }
+
+      // 渲染并获取表格实例
+      var tableIns = table.render(tableOpt)
+
+      // 查询按钮点击事件绑定表格重载
+      $('#btn2').click(() => {
+        tableOpt.where = {
+          beginDate: document.getElementById('beginDate2').value.replaceAll('-', ''),
+          endDate: document.getElementById('endDate2').value.replaceAll('-', ''),
+          testerNames: document.getElementById('testerInput2').value
+        }
+        tableIns.reload(tableOpt)
+      })
+    })
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('chart'))
+
+    // 指定图表的配置项和数据
+    const chartOpt = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross',
+          crossStyle: {
+            color: '#999'
+          }
+        }
+      },
+      toolbox: {
+        feature: {
+          dataView: { show: true, readOnly: true },
+          magicType: { show: true, type: ['line', 'bar'] },
+          restore: { show: true },
+          saveAsImage: { show: true }
+        }
+      }
+    }
+
+    var getBeforeDate = day => {
+      let yesterday = new Date(new Date().getTime() - day * 24 * 60 * 60 * 1000)
+      let year = yesterday.getFullYear()
+      let month = yesterday.getMonth() + 1
+      let date = yesterday.getDate()
+      if (month < 10) {
+        month = '0' + month
+      }
+      if (date < 10) {
+        date = '0' + date
+      }
+      return year + month + date
+    }
+
+    // 重新获取数据并刷新图表
+    var refreshChartOpt = () => {
+      let testerNames = $('#testerInput1').val()
+      let period = $('#period').val()
+      let beginDate = $('#beginDate1').val()
+      let endDate = $('#endDate1').val()
+      if (beginDate === '') {
+        beginDate = getBeforeDate(7)
+      }
+      if (endDate === '') {
+        endDate = getBeforeDate(1)
+      }
+      
+      // 异步获取数据
+      $.ajax({
+        "url": hostport + "/count/" + period,
+        "data": {
+          "beginDate": beginDate.replaceAll('-', ''),
+          "endDate": endDate.replaceAll('-', ''),
+          "testerNames": testerNames
+        },
+        "method": "GET",
+        "async": true,
+        "success": res => {
+          let testerNameArr = []
+          if (testerNames != null && testerNames != '') {
+            testerNameArr = testerNames.split(',')
+          } else {
+            testers.forEach(e => {
+              testerNameArr.push(e.title)
+            })
+          }
+          let series = []
+          for (var i = 0; i < testerNameArr.length; i++) {
+            let testerName = testerNameArr[i]
+            count = res.counts[testerName]
+            series.push({
+              name: testerName,
+              type: 'line',
+              tooltip: {
+                valueFormatter: value => {
+                  return value + ' 个'
+                }
+              },
+              data: count,
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            })
+          }
+          
+          chartOpt.legend = {
+            data: testerNameArr
+          }
+          chartOpt.series = series
+          // 横轴
+          chartOpt.xAxis = {
+            type: 'category',
+            data: res.xAxis,
+            axisPointer: {
+              type: 'shadow'
+            },
+            axisTick: {
+              alignWithLabel: true
+            }
+          }
+
+          // 纵轴
+          chartOpt.yAxis = {
+            type: 'value',
+            name: '计数',
+            axisLabel: {
+              formatter: '{value} 个'
+            }
+          }
+
+          myChart.setOption(chartOpt, true)
+        }
+      })
+    }
+
+    // 查询按钮点击事件绑定图表重载
+    $('#btn1').click(() => {
+      refreshChartOpt()
+    })
+
+    refreshChartOpt()
+
+    const bars = document.getElementById('bars')
+
+    // 插入并渲染柱状图
+    var insertBar = (parent, childBarOpt) => {
+      let bar = document.createElement('div')
+      bar.style.height = '300px'
+      bar.style.width = '400px'
+
+      let panel = document.createElement('div')
+      panel.className = 'layui-panel'
+      panel.appendChild(bar)
+
+      let col = document.createElement('div')
+      col.className = 'layui-col-md1'
+      col.style.width = 'max-content'
+      col.appendChild(panel)
+
+      parent.appendChild(col)
+      
+      echarts.init(bar).setOption(childBarOpt)
+    }
+
+    // 重新获取数据并刷新图表
+    var refreshBarsOpt = () => {
+      // 删除所有图表
+      for (var i = bars.children.length - 1; i >= 0; i--) {
+        bars.removeChild(bars.children[i])
+      }
+
+      // 查询框信息
+      let model = $('#modelSelect').val()
+      let needReport = $('#report input:checked').val()
+      let beginDate = $('#beginDate3').val()
+      let endDate = $('#endDate3').val()
+      if (beginDate === '') {
+        beginDate = getBeforeDate(7)
+      }
+      if (endDate === '') {
+        endDate = getBeforeDate(1)
+      }
+
+      // 异步获取人员
+      $.ajax({
+        "url": hostport + "/count/error",
+        "data": {
+          "beginDate": beginDate.replaceAll('-', ''),
+          "endDate": endDate.replaceAll('-', ''),
+          "model": model,
+          "needReport": needReport
+        },
+        "method": "GET",
+        "async": true,
+        "success": res => {
+          let data = res.data
+          for (let key in data) {
+            var barOpt = {
+              title: {
+                text: key,
+                left: 'center'
+              },
+              tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                  type: 'cross',
+                  crossStyle: {
+                    color: '#999'
+                  }
+                }
+              },
+              xAxis: {
+                type: 'category',
+                axisPointer: {
+                  type: 'shadow'
+                },
+                axisTick: {
+                  alignWithLabel: true
+                },
+                axisLabel: {
+                  interval: 0,
+                  rotate: 30
+                }
+              },
+              yAxis: {
+                type: 'value',
+                name: '计数',
+                axisLabel: {
+                  formatter: '{value} 个'
+                }
+              },
+              series: [
+                {
+                  data: data[key],
+                  type: 'bar',
+                  tooltip: {
+                    valueFormatter: value => {
+                      return value + ' 个'
+                    }
+                  },
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                  }
+                }
+              ]
+            }
+            if (needReport === 'true') {
+              barOpt.xAxis.data = [
+                '文件名重复',
+                '内容错误',
+                'Passed存成Failed',
+                'Failed存成Passed',
+                '文件大小错误',
+                '测试项错误',
+                '过程缺少报告',
+                '报告缺少过程'
+              ]
+            } else {
+              barOpt.xAxis.data = [
+                '文件名重复',
+                '内容错误',
+                'Passed存成Failed',
+                'Failed存成Passed',
+                '文件大小错误',
+                '测试项错误'
+              ]
+            }
+            insertBar(bars, barOpt)
+          }
+        }
+      })
+    }
+
+    refreshBarsOpt()
+
+    // 查询按钮点击事件绑定图表重载
+    $('#btn3').click(() => {
+      refreshBarsOpt()
+    })
+  </script>
+</body>
+
+</html>
