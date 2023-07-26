@@ -69,6 +69,25 @@
     </style>
 </head>
 <body>
+  <div style="z-index: 10000; float: right; position: relative;">
+    <div class="layui-form">
+      <div class="layui-form-item" style="margin: 10px;">
+        <div class="layui-inline">
+          <div class="layui-inline">
+            <label class="layui-form-label" style="width: fit-content; color: rgba(255,255,255,.7);">同步</label>
+            <div class="layui-input-inline" style="width: fit-content;">
+              <input id="syncSwitch" name="syncSwitch" lay-filter="syncSwitch" type="checkbox" lay-skin="switch" lay-text="ON|OFF">
+            </div>
+          </div>
+          <div class="layui-inline">
+            <div class="layui-input-inline" style="width: fit-content;">
+              <button id="syncTimeBtn" type="button" class="layui-btn layui-btn-xs layui-btn-radius layui-btn-primary" style="height: 24px; top: 1px; position: relative; color: rgba(255,255,255,.7);"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
       <ul class="layui-nav">
@@ -160,12 +179,92 @@
     const modifiedBackupInfos = new Set()
     // 被修改过的测试人员编号集合
     const modifiedTesters = new Set()
+    // 同步时间
+    let syncTime = null
+
+    // 获取同步状态的方法
+    var getSyncStatus = () => {
+      $.ajax({
+        "url": hostport + "/sync/status",
+        "method": "GET",
+        "async": false,
+        "success": res => {
+          if (res.data) {
+            isSync = true
+          } else {
+            isSync = false
+          }
+        }
+      })
+      return isSync
+    }
+
+    getSyncStatus()
+
+    if (isSync) {
+      $('#syncSwitch').attr('checked', 'checked')
+      $('#syncTimeBtn').attr('class', "layui-btn layui-btn-xs layui-btn-radius layui-btn-danger")
+    } else {
+      $('#syncSwitch').removeAttr('checked')
+      $('#syncTimeBtn').attr('class', "layui-btn layui-btn-xs layui-btn-radius layui-btn-primary")
+    }
+
+    // 异步获取同步时间
+    var getSyncTime = () => {
+      let time = syncTime     
+      $.ajax({
+        "url": hostport + "/sync/get",
+        "method": "GET",
+        "async": false,
+        success: res => {
+          if (res.data != null) {
+            time = res.data
+          }
+        }
+      })
+      return time
+    }
+
+    syncTime = getSyncTime()
+    $('#syncTimeBtn').prop('textContent', syncTime)
 
     layui.use(() => {
       var layer = layui.layer,
         form = layui.form,
         element = layui.element,
         table = layui.table
+
+      // 监听指定开关
+      form.on('switch(syncSwitch)', data => {
+        let newSync = data.elem.checked
+        // 确认框
+        layer.confirm('确认' + (newSync ? '开启' : '关闭') + '定时同步迁移？', {
+          btn: [(newSync ? '开启' : '关闭'), '取消'] //按钮
+        }, () => {
+          // 发送同步开关请求
+          $.ajax({
+            "url": hostport + "/sync/" + (newSync ? "open" : "close"),
+            "method": "GET",
+            "async": false,
+            "success": res => {
+              // 确认同步状态
+              data.elem.checked = getSyncStatus()
+              // 渲染
+              form.render()
+              if (isSync) {
+                $('#syncTimeBtn').attr('class', "layui-btn layui-btn-xs layui-btn-radius layui-btn-danger")
+              } else {
+                $('#syncTimeBtn').attr('class', "layui-btn layui-btn-xs layui-btn-radius layui-btn-primary")
+              }
+              layer.msg((newSync ? '开启' : '关闭') + (newSync == isSync ? '成功' : '失败'), {icon: 1})
+            }
+          })
+        }, () => {
+          data.elem.checked = isSync
+          // 渲染
+          form.render()
+        })
+      })
 
       // 测试机台表格配置
       var connectionOpt = {
