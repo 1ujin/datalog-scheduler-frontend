@@ -68,13 +68,18 @@
       }
     </style>
 </head>
+<div id="syncTime" class="layui-inline" style="margin: 20px; display: none;">
+  <input type="text" class="layui-input" id="syncTimeInput">
+</div>
 <body>
-  <div style="z-index: 10000; float: right; position: relative;">
+  <div style="z-index: 10000; right: 0; position: fixed;">
     <div class="layui-form">
       <div class="layui-form-item" style="margin: 10px;">
         <div class="layui-inline">
           <div class="layui-inline">
-            <label class="layui-form-label" style="width: fit-content; color: rgba(255,255,255,.7);">同步</label>
+            <div class="layui-input-inline" style="width: fit-content;">
+              <label class="layui-form-label" style="color: rgba(255,255,255,.7);">定时同步</label>
+            </div>
             <div class="layui-input-inline" style="width: fit-content;">
               <input id="syncSwitch" name="syncSwitch" lay-filter="syncSwitch" type="checkbox" lay-skin="switch" lay-text="ON|OFF">
             </div>
@@ -82,6 +87,16 @@
           <div class="layui-inline">
             <div class="layui-input-inline" style="width: fit-content;">
               <button id="syncTimeBtn" type="button" class="layui-btn layui-btn-xs layui-btn-radius layui-btn-primary" style="height: 24px; top: 1px; position: relative; color: rgba(255,255,255,.7);"></button>
+            </div>
+          </div>
+          <div class="layui-inline">
+            <div class="layui-input-inline" style="width: fit-content; color: rgba(255,255,255,.7); transform: scale(1, 2);">
+              |
+            </div>
+          </div>
+          <div class="layui-inline">
+            <div class="layui-input-inline" style="width: fit-content;">
+              <button id="immediateSyncBtn" type="button" class="layui-btn layui-btn-xs layui-btn-radius" style="height: 24px; top: 1px; position: relative; color: rgba(255,255,255,.7);">立即同步</button>
             </div>
           </div>
         </div>
@@ -97,7 +112,7 @@
       </ul>
     </div>
     <div class="layui-body" style="left: 0;">
-      <div class="layui-container" style="">
+      <div class="layui-container" style="width: 80%;">
         <fieldset class="layui-elem-field layui-field-title" style="margin: 20px 0 0 0;">
           <legend>测试机台</legend>
         </fieldset>
@@ -232,6 +247,7 @@
       var layer = layui.layer,
         form = layui.form,
         element = layui.element,
+        laydate = layui.laydate,
         table = layui.table
 
       // 监听指定开关
@@ -263,6 +279,82 @@
           data.elem.checked = isSync
           // 渲染
           form.render()
+        })
+      })
+
+      laydate.render({
+        elem: '#syncTimeInput',
+        type: 'time'
+      })
+
+      $('#syncTimeBtn').click(() => {
+        layer.open({
+          type: 1,
+          title: '修改时间',
+          content: $('#syncTime'),
+          btn: ['修改', '取消'], //按钮
+          success: () => {
+            $('#syncTimeInput').val(syncTime)
+          },
+          yes: () => {
+            let expectSyncTime = $('#syncTimeInput').val()
+            // 发送同步开关请求
+            $.ajax({
+              "url": hostport + "/sync/set",
+              "method": "GET",
+              "async": false,
+              "data": {
+                "time": expectSyncTime
+              },
+              "success": res => {
+                // 确认同步状态
+                syncTime = getSyncTime()
+                layer.closeAll()
+                $('#syncTimeBtn').prop('textContent', syncTime)
+                // 提示
+                if (expectSyncTime === syncTime) {
+                  layer.msg('修改成功', {icon: 1})
+                } else {
+                  layer.msg('修改失败', {icon: 1})
+                }
+              }
+            })
+          }
+        })
+      })
+
+      // 绑定立即同步按钮
+      $('#immediateSyncBtn').click(() => {
+        $.ajax({
+          "url": hostport + "/sync/active-count",
+          "method": "GET",
+          "async": false,
+          "success": res => {
+            if (!isNaN(parseInt(res.data)) && isFinite(res.data)) {
+              layer.msg("获取当前任务数量失败！", {icon: 2})
+            } else if (res.data != null && res.data > 0) {
+              layer.msg("已经有同步任务正在进行！", {icon: 2})
+            } else {
+              layer.confirm('立即开始同步迁移？', {
+                btn: ['确定', '取消'] //按钮
+              }, () => {
+                $.ajax({
+                  "url": hostport + "/sync/immediate",
+                  "method": "GET",
+                  "async": false,
+                  "success": res => {
+                    layer.msg("开始同步...", {icon: 1})
+                  },
+                  "error": (xhr, status, error) => {
+                    layer.msg(xhr.responseJSON.msg, {icon: 2})
+                  }
+                })
+              })
+            }
+          },
+          "error": (xhr, status, error) => {
+            layer.msg(xhr.responseJSON.msg, {icon: 2})
+          }
         })
       })
 
