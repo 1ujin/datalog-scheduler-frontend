@@ -183,11 +183,12 @@
   </div>
 
   <script src="layui/layui.js"></script>
+  <script src="js/properties.js"></script>
   <script type="text/javascript">
     // JQuery
     var $ = layui.$
     // 后端服务地址
-    const hostport = "http://localhost:8080"
+    hostport = "http://" + hostport
     // 被修改过的测试机台编号集合
     const modifiedConnections = new Set()
     // 被修改过的备份机编号集合
