@@ -331,7 +331,7 @@
           "method": "GET",
           "async": false,
           "success": res => {
-            if (!isNaN(parseInt(res.data)) && isFinite(res.data)) {
+            if (isNaN(parseInt(res.data)) || !isFinite(res.data)) {
               layer.msg("获取当前任务数量失败！", {icon: 2})
             } else if (res.data != null && res.data > 0) {
               layer.msg("已经有同步任务正在进行！", {icon: 2})
